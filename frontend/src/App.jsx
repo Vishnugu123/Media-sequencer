@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import MediaPlayer from "./MediaPlayer";
 
+const API_URL = "https://media-sequencer-124f.onrender.com";
+
 function App() {
   const [windows, setWindows] = useState([]);
 
-  // Sync states
+  // -----------------------------
+  // SYNC STATES
+  // -----------------------------
   const [syncing, setSyncing] = useState(false);
   const [syncMedia, setSyncMedia] = useState(null);
   const [syncStartAt, setSyncStartAt] = useState(null);
@@ -13,23 +17,31 @@ function App() {
   const [selectedSyncMedia, setSelectedSyncMedia] = useState("");
   const [syncDuration, setSyncDuration] = useState(10);
 
-  // Add media states
+  // -----------------------------
+  // ADD MEDIA STATES
+  // -----------------------------
   const [selectedWindow, setSelectedWindow] = useState(1);
   const [mediaName, setMediaName] = useState("");
   const [mediaType, setMediaType] = useState("image");
   const [mediaUrl, setMediaUrl] = useState("");
   const [mediaDuration, setMediaDuration] = useState(5);
 
-  // --------------------------------
+  // -----------------------------
   // FETCH WINDOWS
-  // --------------------------------
+  // -----------------------------
   const fetchWindows = () => {
-    fetch("http://localhost:8080/windows")
-      .then((response) => response.json())
+    fetch(`${API_URL}/windows`)
+      .then((response) => {
+        if (!response.ok) {
+          throw new Error("Failed to fetch windows");
+        }
+
+        return response.json();
+      })
       .then((data) => {
         setWindows(data);
 
-        // First media ko default sync media bana do
+        // Set first media as default sync media
         if (!selectedSyncMedia && data.length > 0) {
           const firstMedia = data[0]?.media?.[0];
 
@@ -47,17 +59,24 @@ function App() {
     fetchWindows();
   }, []);
 
-  // --------------------------------
+  // -----------------------------
   // ALL MEDIA
-  // --------------------------------
-  const allMedia = windows.flatMap((window) => window.media);
+  // -----------------------------
+  const allMedia = windows.flatMap((window) => window.media || []);
 
-  // --------------------------------
+  // -----------------------------
   // START SYNC
-  // --------------------------------
+  // -----------------------------
   const startSync = () => {
     if (!selectedSyncMedia) {
       alert("Please select media for sync");
+      return;
+    }
+
+    const duration = Number(syncDuration);
+
+    if (!duration || duration <= 0) {
+      alert("Please enter a valid sync duration");
       return;
     }
 
@@ -70,14 +89,14 @@ function App() {
       return;
     }
 
-    fetch("http://localhost:8080/sync", {
+    fetch(`${API_URL}/sync`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
         media_id: media.id,
-        duration: Number(syncDuration),
+        duration: duration,
       }),
     })
       .then((response) => {
@@ -102,35 +121,44 @@ function App() {
       })
       .catch((error) => {
         console.error("Sync failed:", error);
+
         setSyncing(false);
         setSyncStartAt(null);
         setSyncMedia(null);
+
+        alert("Failed to start sync");
       });
   };
 
-  // --------------------------------
+  // -----------------------------
   // ADD MEDIA
-  // --------------------------------
+  // -----------------------------
   const addMedia = () => {
-    if (!mediaName || !mediaDuration) {
-      alert("Please fill media name and duration");
+    if (!mediaName.trim()) {
+      alert("Please enter media name");
       return;
     }
 
-    if (mediaType !== "blank" && !mediaUrl) {
+    if (!mediaDuration || Number(mediaDuration) <= 0) {
+      alert("Please enter a valid duration");
+      return;
+    }
+
+    // Blank media does not need URL
+    if (mediaType !== "blank" && !mediaUrl.trim()) {
       alert("Please enter media URL");
       return;
     }
 
     const newMedia = {
       id: Date.now(),
-      name: mediaName,
+      name: mediaName.trim(),
       type: mediaType,
-      url: mediaType === "blank" ? "" : mediaUrl,
+      url: mediaType === "blank" ? "" : mediaUrl.trim(),
       duration: Number(mediaDuration),
     };
 
-    fetch(`http://localhost:8080/media/${selectedWindow}`, {
+    fetch(`${API_URL}/media/${selectedWindow}`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -147,11 +175,14 @@ function App() {
       .then(() => {
         alert("Media added successfully!");
 
+        // Refresh windows
         fetchWindows();
 
+        // Reset form
         setMediaName("");
         setMediaUrl("");
         setMediaDuration(5);
+        setMediaType("image");
       })
       .catch((error) => {
         console.error("Add media failed:", error);
@@ -159,6 +190,9 @@ function App() {
       });
   };
 
+  // -----------------------------
+  // UI
+  // -----------------------------
   return (
     <div className="app">
 
@@ -218,9 +252,7 @@ function App() {
 
         <select
           value={selectedWindow}
-          onChange={(e) =>
-            setSelectedWindow(Number(e.target.value))
-          }
+          onChange={(e) => setSelectedWindow(Number(e.target.value))}
         >
           {windows.map((window) => (
             <option key={window.id} value={window.id}>
@@ -279,7 +311,7 @@ function App() {
             <h2>{window.name}</h2>
 
             <MediaPlayer
-              media={window.media}
+              media={window.media || []}
               syncing={syncing}
               syncMedia={syncMedia}
               syncStartAt={syncStartAt}
