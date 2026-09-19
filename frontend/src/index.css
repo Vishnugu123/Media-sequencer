@@ -1,0 +1,156 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #111318;
+  color: white;
+}
+
+.app {
+  min-height: 100vh;
+  padding: 30px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.windows-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 25px;
+}
+
+.window-card {
+  background: #1b1e25;
+  border: 1px solid #343943;
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.window-card h2 {
+  margin-top: 0;
+}
+
+.media-list {
+  display: grid;
+  gap: 15px;
+}
+
+.media-card {
+  background: #252932;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.media-card img,
+.media-card video {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  display: block;
+}
+
+.media-info {
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.media-info span {
+  color: #aaa;
+}
+
+.player {
+  position: relative;
+  background: #000;       
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.player img,
+.player video {
+  width: 100%;
+  height: 350px;
+  object-fit: cover;
+  display: block;
+}
+
+.player-info {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.7);
+}
+
+button {
+  display: block;
+  margin: 0 auto 30px;
+  padding: 12px 28px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: white;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.sync-button {
+  min-width: 180px;
+}
+
+.sync-button.syncing {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  opacity: 0.9;
+}
+
+button:active {
+  transform: translateY(0);
+}                      
+
+.add-media-form {
+  max-width: 600px;
+  margin: 0 auto 30px;
+  padding: 20px;
+  background: #1b1e25;
+  border: 1px solid #343943;
+  border-radius: 12px;
+}
+
+.add-media-form h2 {
+  margin-top: 0;
+}
+
+.add-media-form input,
+.add-media-form select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 12px;
+  border: 1px solid #444;
+  border-radius: 6px;
+  background: #252932;
+  color: white;
+}
+
+.add-media-form button {
+  margin: 10px auto 0;
+}
+
+.blank-media {
+  width: 100%;
+  height: 350px;
+  background: black;
+}
